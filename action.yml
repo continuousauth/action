@@ -1,0 +1,57 @@
+name: 'Continuous Auth Publish Action'
+description: 'Publish a semantic release npm package via CFA'
+inputs:
+  project-id:
+    description: 'CFA_PROJECT_ID secret value'
+    required: true
+  secret:
+    description: 'CFA_SECRET secret value'
+    required: true
+  npm-token:
+    description: 'NPM_TOKEN secret value'
+    required: true
+runs:
+  using: "composite"
+  steps:
+    - name: Set up publishing environment
+      run: |
+        SHA=1775eb1aacafd0266ea1897255758d985d0bf291
+        DIR=/tmp/semantic-release-packages
+        mkdir $DIR
+        cp ${{ github.action_path }}/package.json $DIR/package.json
+        cp ${{ github.action_path }}/package-lock.json $DIR/package-lock.json
+        cd $DIR
+        npm ci
+        echo "$DIR/node_modules/.bin" >> "$GITHUB_PATH"
+      shell: bash
+
+    - name: Obtain OIDC token
+      id: oidc
+      run: |
+        token=$(curl --fail -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
+          "$ACTIONS_ID_TOKEN_REQUEST_URL&audience=continuousauth.dev" | jq -r '.value')
+        echo "::add-mask::${token}"
+        echo "token=${token}" >> $GITHUB_OUTPUT
+      shell: bash
+
+    - name: Obtain GitHub credentials
+      id: github_creds
+      run: |
+        token=$(curl --fail "https://continuousauth.dev/api/request/${{ inputs.project-id }}/github/credentials" \
+          -X POST \
+          -H "Content-Type: application/json" \
+          -H "Authorization: bearer ${{ inputs.secret }}" \
+          --data "{\"token\":\"${{ steps.oidc.outputs.token }}\"}" | jq -r '.GITHUB_TOKEN')
+        echo "::add-mask::${token}"
+        echo "token=${token}" >> $GITHUB_OUTPUT
+      shell: bash
+
+    - name: Run semantic release
+      run: semantic-release
+      shell: bash
+      env:
+        GITHUB_ACTION: 1
+        GITHUB_TOKEN: ${{ steps.github_creds.outputs.token }}
+        CFA_PROJECT_ID: ${{ inputs.project-id }}
+        CFA_SECRET: ${{ inputs.secret }}
+        NPM_TOKEN: ${{ inputs.npm-token }}

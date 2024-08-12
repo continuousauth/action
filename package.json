@@ -1,0 +1,13 @@
+{
+  "name": "@continuousauth/action",
+  "private": true,
+  "version": "0.0.0-development",
+  "description": "",
+  "keywords": [],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "@continuous-auth/semantic-release-npm": "^4.0.0",
+    "semantic-release": "^22.0.6"
+  }
+}
