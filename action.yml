@@ -52,6 +52,7 @@ runs:
       env:
         GITHUB_ACTION: 1
         GITHUB_TOKEN: ${{ steps.github_creds.outputs.token }}
+        GITHUB_OIDC_TOKEN: ${{ steps.oidc.outputs.token }}
         CFA_PROJECT_ID: ${{ inputs.project-id }}
         CFA_SECRET: ${{ inputs.secret }}
         NPM_TOKEN: ${{ inputs.npm-token }}
