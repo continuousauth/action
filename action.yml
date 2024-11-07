@@ -15,7 +15,6 @@ runs:
   steps:
     - name: Set up publishing environment
       run: |
-        SHA=1775eb1aacafd0266ea1897255758d985d0bf291
         DIR=/tmp/semantic-release-packages
         mkdir $DIR
         cp ${{ github.action_path }}/package.json $DIR/package.json
