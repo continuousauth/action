@@ -55,4 +55,3 @@ runs:
         CFA_PROJECT_ID: ${{ inputs.project-id }}
         CFA_SECRET: ${{ inputs.secret }}
         NPM_TOKEN: ${{ inputs.npm-token }}
-      timeout-minutes: 60
